@@ -1,0 +1,58 @@
+type Response_1 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             text;
+             CharacterClass;
+           };
+ };
+type Response = 
+ variant {
+   err: Error;
+   ok: text;
+ };
+type Error = 
+ variant {
+   AlreadyExisting;
+   NotAuthorized;
+   NotFound;
+ };
+type CharacterClass = 
+ record {
+   baseHp: int;
+   baseMana: int;
+   baseMorale: int;
+   baseStamina: int;
+   description: text;
+   name: text;
+   specialAbility: text;
+   uuid: opt text;
+ };
+type Character = 
+ record {
+   classId: opt text;
+   currentHp: int;
+   currentMana: int;
+   currentMorale: int;
+   currentStamina: int;
+   experience: int;
+   gearIds: opt vec text;
+   intelligent: int;
+   level: int;
+   luck: int;
+   maxHp: int;
+   maxMana: int;
+   maxMorale: int;
+   maxStamina: int;
+   name: text;
+   status: opt text;
+   strength: opt int;
+   uuid: text;
+   vitality: int;
+ };
+service : {
+  createCharacter: (text, Character) -> (Response);
+  createCharacterClass: (CharacterClass) -> (Response);
+  listCharacterClasses: () -> (Response_1) query;
+  updateCharacter: (Character) -> (Response);
+}
