@@ -1,21 +1,22 @@
 import type { Principal } from '@dfinity/principal';
 export interface Character {
   'maxHp' : bigint,
-  'status' : [] | [string],
   'intelligent' : bigint,
   'currentStamina' : bigint,
   'currentHp' : bigint,
   'gearIds' : [] | [Array<string>],
   'luck' : bigint,
   'name' : string,
-  'uuid' : string,
-  'classId' : [] | [string],
+  'uuid' : [] | [bigint],
+  'classId' : [] | [bigint],
   'level' : bigint,
-  'experience' : bigint,
   'currentMana' : bigint,
-  'strength' : [] | [bigint],
+  'materialIds' : [] | [Array<string>],
+  'strength' : bigint,
   'maxStamina' : bigint,
   'currentMorale' : bigint,
+  'lvlUpExp' : bigint,
+  'currentExp' : bigint,
   'maxMana' : bigint,
   'vitality' : bigint,
   'maxMorale' : bigint,
@@ -23,7 +24,7 @@ export interface Character {
 export interface CharacterClass {
   'specialAbility' : string,
   'name' : string,
-  'uuid' : [] | [string],
+  'uuid' : [] | [bigint],
   'baseHp' : bigint,
   'description' : string,
   'baseStamina' : bigint,
@@ -35,11 +36,20 @@ export type Error = { 'AlreadyExisting' : null } |
   { 'NotAuthorized' : null };
 export type Response = { 'ok' : string } |
   { 'err' : Error };
-export type Response_1 = { 'ok' : Array<[string, CharacterClass]> } |
+export type Response_1 = { 'ok' : Array<[string, Character]> } |
+  { 'err' : Error };
+export type Response_2 = { 'ok' : Array<[string, CharacterClass]> } |
   { 'err' : Error };
 export interface _SERVICE {
-  'createCharacter' : (arg_0: string, arg_1: Character) => Promise<Response>,
+  'createCharacter' : (arg_0: string, arg_1: string) => Promise<Response>,
   'createCharacterClass' : (arg_0: CharacterClass) => Promise<Response>,
-  'listCharacterClasses' : () => Promise<Response_1>,
-  'updateCharacter' : (arg_0: Character) => Promise<Response>,
+  'listCharacterClasses' : () => Promise<Response_2>,
+  'listCharacters' : () => Promise<Response_1>,
+  'updateCharacter' : (
+      arg_0: bigint,
+      arg_1: bigint,
+      arg_2: bigint,
+      arg_3: bigint,
+      arg_4: bigint,
+    ) => Promise<Response>,
 }

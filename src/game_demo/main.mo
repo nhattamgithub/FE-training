@@ -5,6 +5,8 @@ import Iter "mo:base/Iter";
 import Principal "mo:base/Principal";
 import Option "mo:base/Option";
 import Array "mo:base/Array";
+import Nat "mo:base/Nat";
+import Int "mo:base/Int";
 
 import State "../game_demo_models/State";
 import Types "../game_demo_models/Types";
@@ -43,10 +45,15 @@ actor {
 
   type Response<Ok> = Result.Result<Ok, Types.Error>;
 
+  // Game
   // Character Class
   public shared({caller}) func createCharacterClass(characterClass : Types.CharacterClass) : async Response<Text> {
-    let uuid = await GeneralUtils.createUUID();
-    let readCharacterClass = state.characterClasses.get(uuid); 
+    // if(Principal.toText(caller) == "2vxsx-fae") {
+    //   return #err(#NotAuthorized);//isNotAuthorized
+    // };
+    // let uuid : Text = await GeneralUtils.createUUID();
+    let uuid = state.characterClasses.size() + 1;
+    let readCharacterClass = state.characterClasses.get(Nat.toText(uuid)); 
     switch (readCharacterClass) {
       case (?V) { #err(#AlreadyExisting); };
       case null {
@@ -60,7 +67,7 @@ actor {
           baseMorale = characterClass.baseMorale;
           baseStamina = characterClass.baseStamina;
         };
-        let createdCharacterClass = state.characterClasses.put(uuid, newCharacterClass);
+        let createdCharacterClass = state.characterClasses.put(Nat.toText(uuid), newCharacterClass);
         #ok("Success");
       };
     };
@@ -68,9 +75,9 @@ actor {
 
   public shared query({caller}) func listCharacterClasses() : async Response<[(Text, Types.CharacterClass)]> {
     var list : [(Text, Types.CharacterClass)] = [];
-    if(Principal.toText(caller) == "2vxsx-fae") {
-      throw Error.reject("NotAuthorized");  //isNotAuthorized
-    };
+    // if(Principal.toText(caller) == "2vxsx-fae") {
+    //   return #err(#NotAuthorized);//isNotAuthorized
+    // };
 
     for((K,V) in state.characterClasses.entries()) {
       list := Array.append<(Text, Types.CharacterClass)>(list, [(K, V)]);
@@ -79,10 +86,14 @@ actor {
   };
 
   // Character
-  public shared({caller}) func createCharacter(characterClassId : Text, character : Types.Character) : async Response<Text> {
-    let uuid = await GeneralUtils.createUUID();
+  public shared({caller}) func createCharacter(characterClassId : Text, characterName : Text) : async Response<Text> {
+    // if(Principal.toText(caller) == "2vxsx-fae") {
+    //   return #err(#NotAuthorized);//isNotAuthorized
+    // };
+    // let uuid : Text = await GeneralUtils.createUUID();
+    let uuid = state.characters.size() + 1;
     let readCharacterClass = state.characterClasses.get(characterClassId);
-    let readCharacter = state.characters.get(uuid);
+    let readCharacter = state.characters.get(Nat.toText(uuid));
     switch (readCharacter) {
       case (?V) { #err(#AlreadyExisting); };
       case (null) {
@@ -90,12 +101,11 @@ actor {
           case null { #err(#NotFound) };
           case (?characterClass) {
             let newCharacter : Types.Character = {
-              uuid = uuid;
-              name = character.name;
+              uuid = ?uuid;
+              name = characterName;
               level = 1;
-              experience = 0;
-              status : ?Text = Option.get(null, ?"");
-              strength : ?Int = Option.get(null, ?0);
+              currentExp = 0;
+              lvlUpExp = 100;
               currentMana = characterClass.baseMana;
               maxMana = characterClass.baseMana;
               currentStamina = characterClass.baseStamina;
@@ -104,13 +114,15 @@ actor {
               maxMorale = characterClass.baseMorale;
               currentHp = characterClass.baseHp;
               maxHp = characterClass.baseHp;
+              strength = 6;
               luck = 0;
               intelligent = 0;
               vitality = 0;
               classId = characterClass.uuid;
               gearIds : ?[Text] = Option.get(null, ?[]);
+              materialIds : ?[Text] = Option.get(null, ?[]);
             };
-            let createdCharacter = state.characters.put(uuid, newCharacter);
+            let createdCharacter = state.characters.put(Nat.toText(uuid), newCharacter);
             #ok("Success");
           };
         };
@@ -118,35 +130,51 @@ actor {
     };
   };
 
-  public shared({caller}) func updateCharacter(character : Types.Character) : async Response<Text> {
-    let readCharacter = state.characters.get(character.uuid);
+  public shared query({caller}) func listCharacters() : async Response<[(Text, Types.Character)]> {
+    var list : [(Text, Types.Character)] = [];
+    // if(Principal.toText(caller) == "2vxsx-fae") {
+    //   return #err(#NotAuthorized);//isNotAuthorized
+    // };
+
+    for((K,V) in state.characters.entries()) {
+      list := Array.append<(Text, Types.Character)>(list, [(K, V)]);
+    };
+    #ok((list));
+  };
+  
+  public shared({caller}) func updateCharacter(characterId : Int, manaLoss : Int, staminaLoss : Int, hpLoss : Int, moraleLoss : Int) : async Response<Text> {
+    // if(Principal.toText(caller) == "2vxsx-fae") {
+    //   return #err(#NotAuthorized);//isNotAuthorized
+    // };
+    let readCharacter = state.characters.get(Int.toText(characterId));
     switch (readCharacter) {
       case null {
         #err(#NotFound);
       };
       case (?character) {
         let newCharacter : Types.Character = {
-          uuid = character.uuid;
+          uuid = ?characterId;
           name = character.name;
           level = character.level;
-          experience = character.experience;
-          status = character.status;
-          strength = character.strength;
-          currentMana = character.currentMana;
+          currentExp = character.currentExp;
+          lvlUpExp = character.lvlUpExp;
+          currentMana = character.currentMana - manaLoss;
           maxMana = character.maxMana;
-          currentStamina = character.currentStamina;
+          currentStamina = character.currentStamina - staminaLoss;
           maxStamina = character.maxStamina;
-          currentMorale = character.currentMorale;
+          currentMorale = character.currentMorale - moraleLoss;
           maxMorale = character.maxMorale;
-          currentHp = character.currentHp;
+          currentHp = character.currentHp - hpLoss;
           maxHp = character.maxHp;
+          strength = character.strength;
           luck = character.luck;
           intelligent = character.intelligent;
           vitality = character.vitality;
-          classId = ?character.uuid;
+          classId = character.classId;
           gearIds = character.gearIds;
+          materialIds = character.materialIds;
         };
-        let updatedCharacter = state.characters.replace(character.uuid, newCharacter);
+        let updatedCharacter = state.characters.replace(Int.toText(characterId), newCharacter);
         #ok("Success");
       };
     };

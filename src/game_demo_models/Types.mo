@@ -20,12 +20,11 @@ module {
 
   //--------------------- Character ---------------------//
   public type Character = {
-    uuid : Text;
+    uuid : ?Int;
     name : Text;
     level : Int;
-    experience : Int;
-    status : ?Text;
-    strength : ?Int;
+    currentExp : Int;
+    lvlUpExp : Int;
     currentMana : Int;
     maxMana : Int;
     currentStamina : Int;
@@ -34,15 +33,17 @@ module {
     maxMorale : Int;
     currentHp : Int;
     maxHp : Int;
+    strength : Int;
     luck : Int;
     intelligent : Int;
     vitality : Int;
-    classId : ?Text;
+    classId : ?Int;
     gearIds : ?[Text];
+    materialIds : ?[Text];
   };
 
   public type CharacterClass = {
-    uuid : ?Text;
+    uuid : ?Int;
     name : Text;
     specialAbility : Text;
     description : Text;

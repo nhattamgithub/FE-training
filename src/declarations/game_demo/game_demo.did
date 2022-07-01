@@ -1,9 +1,17 @@
-type Response_1 = 
+type Response_2 = 
  variant {
    err: Error;
    ok: vec record {
              text;
              CharacterClass;
+           };
+ };
+type Response_1 = 
+ variant {
+   err: Error;
+   ok: vec record {
+             text;
+             Character;
            };
  };
 type Response = 
@@ -26,33 +34,35 @@ type CharacterClass =
    description: text;
    name: text;
    specialAbility: text;
-   uuid: opt text;
+   uuid: opt int;
  };
 type Character = 
  record {
-   classId: opt text;
+   classId: opt int;
+   currentExp: int;
    currentHp: int;
    currentMana: int;
    currentMorale: int;
    currentStamina: int;
-   experience: int;
    gearIds: opt vec text;
    intelligent: int;
    level: int;
    luck: int;
+   lvlUpExp: int;
+   materialIds: opt vec text;
    maxHp: int;
    maxMana: int;
    maxMorale: int;
    maxStamina: int;
    name: text;
-   status: opt text;
-   strength: opt int;
-   uuid: text;
+   strength: int;
+   uuid: opt int;
    vitality: int;
  };
 service : {
-  createCharacter: (text, Character) -> (Response);
+  createCharacter: (text, text) -> (Response);
   createCharacterClass: (CharacterClass) -> (Response);
-  listCharacterClasses: () -> (Response_1) query;
-  updateCharacter: (Character) -> (Response);
+  listCharacterClasses: () -> (Response_2) query;
+  listCharacters: () -> (Response_1) query;
+  updateCharacter: (int, int, int, int, int) -> (Response);
 }
